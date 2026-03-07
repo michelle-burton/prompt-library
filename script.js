@@ -15,22 +15,30 @@ function getPrompts() {
   }
 }
 
-function savePrompts(prompts) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(prompts));
+function createRatingStars(promptId, currentRating) {
+  const container = document.createElement('div');
+  container.className = 'rating-stars';
+  
+  for (let i = 1; i <= 5; i++) {
+    const star = document.createElement('span');
+    star.className = `star ${i <= currentRating ? 'filled' : ''}`;
+    star.textContent = '★';
+    star.dataset.rating = i;
+    star.addEventListener('click', () => setRating(promptId, i));
+    container.appendChild(star);
+  }
+  
+  return container;
 }
 
-function exportPrompts() {
+function setRating(promptId, rating) {
   const prompts = getPrompts();
-  const dataStr = JSON.stringify(prompts, null, 2);
-  const dataBlob = new Blob([dataStr], { type: 'application/json' });
-  const url = URL.createObjectURL(dataBlob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = 'prompts.json';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  const prompt = prompts.find(p => p.id === promptId);
+  if (prompt) {
+    prompt.rating = rating;
+    savePrompts(prompts);
+    renderPrompts();
+  }
 }
 
 function previewText(text, wordLimit = 12) {
@@ -63,17 +71,19 @@ function renderPrompts() {
     const preview = document.createElement("p");
     preview.textContent = previewText(prompt.content);
 
+    const ratingContainer = createRatingStars(prompt.id, prompt.rating || 0);
+
     const deleteBtn = document.createElement("button");
     deleteBtn.type = "button";
     deleteBtn.className = "delete-btn";
     deleteBtn.textContent = "Delete";
     deleteBtn.addEventListener("click", () => {
-      const updated = getPrompts().filter((_, i) => i !== index);
+      const updated = getPrompts().filter((p) => p.id !== prompt.id);
       savePrompts(updated);
       renderPrompts();
     });
 
-    card.append(title, preview, deleteBtn);
+    card.append(title, preview, ratingContainer, deleteBtn);
     promptList.appendChild(card);
   });
 }
@@ -89,7 +99,13 @@ form.addEventListener("submit", (event) => {
   }
 
   const prompts = getPrompts();
-  prompts.unshift({ title, content });
+  const newPrompt = {
+    id: `prompt-${Date.now()}`,
+    title,
+    content,
+    rating: 0
+  };
+  prompts.unshift(newPrompt);
   savePrompts(prompts);
 
   form.reset();

@@ -136,6 +136,28 @@ button:hover {
   color: var(--danger);
 }
 
+.rating-stars {
+  display: flex;
+  gap: 0.2rem;
+  margin-top: 0.5rem;
+}
+
+.star {
+  font-size: 1.2rem;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.star:hover,
+.star.filled {
+  color: #ffd700; /* Gold color for filled stars */
+}
+
+.star:hover ~ .star {
+  color: var(--muted);
+}
+
 .empty-state {
   color: var(--muted);
   padding: 0.35rem 0;
