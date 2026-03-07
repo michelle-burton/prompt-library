@@ -1,0 +1,133 @@
+:root {
+  color-scheme: dark;
+  --bg: #0f1117;
+  --panel: #171b25;
+  --panel-border: #2b3244;
+  --text: #e8ecf5;
+  --muted: #a6b0c4;
+  --accent: #58a6ff;
+  --danger: #f85149;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "JetBrains Mono", "Fira Code", Consolas, Monaco, monospace;
+  background: radial-gradient(circle at top, #1b2230 0%, var(--bg) 45%);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.app {
+  width: min(900px, 92vw);
+  margin: 2.5rem auto;
+}
+
+h1,
+h2 {
+  margin: 0 0 1rem;
+}
+
+h1 {
+  font-size: 1.75rem;
+}
+
+h2 {
+  font-size: 1.1rem;
+  color: var(--muted);
+}
+
+.prompt-form {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 1.1rem;
+  display: grid;
+  gap: 0.65rem;
+  margin-bottom: 1.5rem;
+}
+
+label {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+input,
+textarea,
+button {
+  font: inherit;
+}
+
+input,
+textarea {
+  width: 100%;
+  background: #0c1018;
+  border: 1px solid #2f384d;
+  border-radius: 8px;
+  color: var(--text);
+  padding: 0.7rem;
+}
+
+input:focus,
+textarea:focus {
+  outline: 2px solid transparent;
+  border-color: var(--accent);
+}
+
+button {
+  border: 1px solid #2f384d;
+  border-radius: 8px;
+  padding: 0.65rem 0.9rem;
+  background: #1f2636;
+  color: var(--text);
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--accent);
+}
+
+.prompt-list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.prompt-card {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 0.9rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.prompt-card h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.prompt-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.prompt-card .delete-btn {
+  justify-self: start;
+  background: transparent;
+  border-color: #41303a;
+  color: #ff9fa2;
+}
+
+.prompt-card .delete-btn:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.empty-state {
+  color: var(--muted);
+  padding: 0.35rem 0;
+}

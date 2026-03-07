@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prompt Library</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <h1>Prompt Library</h1>
+
+      <form id="prompt-form" class="prompt-form">
+        <label for="prompt-title">Prompt Title</label>
+        <input
+          id="prompt-title"
+          name="title"
+          type="text"
+          placeholder="e.g. Blog Post Generator"
+          required
+        />
+
+        <label for="prompt-content">Prompt Content</label>
+        <textarea
+          id="prompt-content"
+          name="content"
+          rows="6"
+          placeholder="Write your prompt here..."
+          required
+        ></textarea>
+
+        <button type="submit">Save Prompt</button>
+      </form>
+
+      <section>
+        <h2>Saved Prompts</h2>
+        <div id="prompt-list" class="prompt-list" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
