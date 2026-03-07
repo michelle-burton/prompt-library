@@ -4,6 +4,7 @@ const form = document.getElementById("prompt-form");
 const titleInput = document.getElementById("prompt-title");
 const contentInput = document.getElementById("prompt-content");
 const promptList = document.getElementById("prompt-list");
+const exportBtn = document.getElementById("export-btn");
 
 function getPrompts() {
   try {
@@ -16,6 +17,20 @@ function getPrompts() {
 
 function savePrompts(prompts) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(prompts));
+}
+
+function exportPrompts() {
+  const prompts = getPrompts();
+  const dataStr = JSON.stringify(prompts, null, 2);
+  const dataBlob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(dataBlob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'prompts.json';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
 function previewText(text, wordLimit = 12) {
@@ -80,5 +95,7 @@ form.addEventListener("submit", (event) => {
   form.reset();
   renderPrompts();
 });
+
+exportBtn.addEventListener("click", exportPrompts);
 
 renderPrompts();

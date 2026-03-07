@@ -90,6 +90,15 @@ button:hover {
   border-color: var(--accent);
 }
 
+.export-btn {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.export-btn:hover {
+  background: #79c0ff;
+}
+
 .prompt-list {
   display: grid;
   gap: 0.8rem;

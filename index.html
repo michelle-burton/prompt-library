@@ -33,7 +33,10 @@
       </form>
 
       <section>
-        <h2>Saved Prompts</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h2>Saved Prompts</h2>
+          <button id="export-btn" type="button" class="export-btn">Export Prompts</button>
+        </div>
         <div id="prompt-list" class="prompt-list" aria-live="polite"></div>
       </section>
     </main>
