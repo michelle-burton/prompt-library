@@ -35,6 +35,7 @@ function renderPrompts() {
     card.innerHTML = `
       <div class="card-title" title="${escapeHtml(prompt.title)}">${escapeHtml(prompt.title)}</div>
       <div class="card-preview">${escapeHtml(preview(prompt.content))}</div>
+      <div class="card-stars">${renderStars(prompt)}</div>
       <div class="card-footer">
         <button class="delete-btn" data-id="${prompt.id}">Delete</button>
       </div>
@@ -44,6 +45,39 @@ function renderPrompts() {
 
   promptList.querySelectorAll('.delete-btn').forEach((btn) => {
     btn.addEventListener('click', () => deletePrompt(btn.dataset.id));
+  });
+
+  promptList.querySelectorAll('.star').forEach((star) => {
+    star.addEventListener('click', () => setRating(star.dataset.id, Number(star.dataset.star)));
+    star.addEventListener('mouseover', () => highlightStars(star.dataset.id, Number(star.dataset.star)));
+    star.addEventListener('mouseout', () => resetStarHighlight(star.dataset.id));
+  });
+}
+
+function renderStars(prompt) {
+  return Array.from({ length: 5 }, (_, i) => {
+    const filled = prompt.rating && i < prompt.rating;
+    return `<span class="star ${filled ? 'filled' : ''}" data-id="${prompt.id}" data-star="${i + 1}">★</span>`;
+  }).join('');
+}
+
+function setRating(id, stars) {
+  const prompts = getPrompts();
+  const prompt = prompts.find((p) => p.id === id);
+  prompt.rating = prompt.rating === stars ? null : stars;
+  savePrompts(prompts);
+  renderPrompts();
+}
+
+function highlightStars(id, upTo) {
+  document.querySelectorAll(`.star[data-id="${id}"]`).forEach((star) => {
+    star.classList.toggle('hovered', Number(star.dataset.star) <= upTo);
+  });
+}
+
+function resetStarHighlight(id) {
+  document.querySelectorAll(`.star[data-id="${id}"]`).forEach((star) => {
+    star.classList.remove('hovered');
   });
 }
 
