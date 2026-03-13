@@ -1,117 +1,85 @@
-const STORAGE_KEY = "promptLibrary.prompts";
+const STORAGE_KEY = 'prompt-library';
 
-const form = document.getElementById("prompt-form");
-const titleInput = document.getElementById("prompt-title");
-const contentInput = document.getElementById("prompt-content");
-const promptList = document.getElementById("prompt-list");
-const exportBtn = document.getElementById("export-btn");
+const form = document.getElementById('prompt-form');
+const titleInput = document.getElementById('title');
+const contentInput = document.getElementById('content');
+const promptList = document.getElementById('prompt-list');
+const emptyState = document.getElementById('empty-state');
 
 function getPrompts() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
+  return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
 }
 
-function createRatingStars(promptId, currentRating) {
-  const container = document.createElement('div');
-  container.className = 'rating-stars';
-  
-  for (let i = 1; i <= 5; i++) {
-    const star = document.createElement('span');
-    star.className = `star ${i <= currentRating ? 'filled' : ''}`;
-    star.textContent = '★';
-    star.dataset.rating = i;
-    star.addEventListener('click', () => setRating(promptId, i));
-    container.appendChild(star);
-  }
-  
-  return container;
+function savePrompts(prompts) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(prompts));
 }
 
-function setRating(promptId, rating) {
-  const prompts = getPrompts();
-  const prompt = prompts.find(p => p.id === promptId);
-  if (prompt) {
-    prompt.rating = rating;
-    savePrompts(prompts);
-    renderPrompts();
-  }
-}
-
-function previewText(text, wordLimit = 12) {
-  const words = text.trim().split(/\s+/).filter(Boolean);
-  if (words.length <= wordLimit) {
-    return words.join(" ");
-  }
-  return `${words.slice(0, wordLimit).join(" ")}...`;
+function preview(text) {
+  return text.length > 60 ? text.slice(0, 60).trimEnd() + '…' : text;
 }
 
 function renderPrompts() {
   const prompts = getPrompts();
-  promptList.innerHTML = "";
+  promptList.innerHTML = '';
 
   if (prompts.length === 0) {
-    const empty = document.createElement("p");
-    empty.className = "empty-state";
-    empty.textContent = "No prompts saved yet.";
-    promptList.appendChild(empty);
+    emptyState.classList.add('visible');
     return;
   }
 
-  prompts.forEach((prompt, index) => {
-    const card = document.createElement("article");
-    card.className = "prompt-card";
+  emptyState.classList.remove('visible');
 
-    const title = document.createElement("h3");
-    title.textContent = prompt.title;
-
-    const preview = document.createElement("p");
-    preview.textContent = previewText(prompt.content);
-
-    const ratingContainer = createRatingStars(prompt.id, prompt.rating || 0);
-
-    const deleteBtn = document.createElement("button");
-    deleteBtn.type = "button";
-    deleteBtn.className = "delete-btn";
-    deleteBtn.textContent = "Delete";
-    deleteBtn.addEventListener("click", () => {
-      const updated = getPrompts().filter((p) => p.id !== prompt.id);
-      savePrompts(updated);
-      renderPrompts();
-    });
-
-    card.append(title, preview, ratingContainer, deleteBtn);
+  prompts.forEach((prompt) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-title" title="${escapeHtml(prompt.title)}">${escapeHtml(prompt.title)}</div>
+      <div class="card-preview">${escapeHtml(preview(prompt.content))}</div>
+      <div class="card-footer">
+        <button class="delete-btn" data-id="${prompt.id}">Delete</button>
+      </div>
+    `;
     promptList.appendChild(card);
+  });
+
+  promptList.querySelectorAll('.delete-btn').forEach((btn) => {
+    btn.addEventListener('click', () => deletePrompt(btn.dataset.id));
   });
 }
 
-form.addEventListener("submit", (event) => {
-  event.preventDefault();
+function deletePrompt(id) {
+  const prompts = getPrompts().filter((p) => p.id !== id);
+  savePrompts(prompts);
+  renderPrompts();
+}
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
 
   const title = titleInput.value.trim();
   const content = contentInput.value.trim();
-
-  if (!title || !content) {
-    return;
-  }
+  if (!title || !content) return;
 
   const prompts = getPrompts();
-  const newPrompt = {
-    id: `prompt-${Date.now()}`,
+  prompts.unshift({
+    id: crypto.randomUUID(),
     title,
     content,
-    rating: 0
-  };
-  prompts.unshift(newPrompt);
+    createdAt: Date.now(),
+  });
+
   savePrompts(prompts);
-
-  form.reset();
   renderPrompts();
+  form.reset();
+  titleInput.focus();
 });
-
-exportBtn.addEventListener("click", exportPrompts);
 
 renderPrompts();
