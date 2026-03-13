@@ -205,6 +205,102 @@ button[type="submit"]:hover {
   color: #fff;
 }
 
+/* Notes */
+
+.card-note-section {
+  margin-top: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.note-display {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.7rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.note-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.note-add-btn,
+.note-edit-btn,
+.note-save-btn,
+.note-cancel-btn,
+.note-delete-btn {
+  background: transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.65rem;
+  transition: background 0.15s, color 0.15s;
+}
+
+.note-add-btn,
+.note-edit-btn {
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.note-add-btn:hover,
+.note-edit-btn:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+.note-save-btn {
+  border: 1px solid var(--accent);
+  color: var(--accent);
+}
+
+.note-save-btn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.note-cancel-btn {
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.note-cancel-btn:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+.note-delete-btn {
+  border: 1px solid var(--danger);
+  color: var(--danger);
+}
+
+.note-delete-btn:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+.note-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.note-editor-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.note-textarea {
+  font-size: 0.8rem;
+  resize: vertical;
+}
+
 .empty-state {
   color: var(--text-muted);
   font-size: 0.9rem;
