@@ -310,3 +310,97 @@ button[type="submit"]:hover {
 .empty-state.visible {
   display: block;
 }
+
+/* Inline checkbox field */
+
+.field--inline {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.field--inline-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.field--inline-label input[type="checkbox"] {
+  width: auto;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* Metadata */
+
+.card-metadata {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.7rem;
+  margin-top: 0.25rem;
+}
+
+.metadata-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.metadata-label {
+  color: var(--text-muted);
+  min-width: 3.5rem;
+  flex-shrink: 0;
+}
+
+.metadata-value {
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.metadata-model-name {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: #58a6ff;
+}
+
+/* Token confidence badges */
+
+.confidence-badge {
+  display: inline-block;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.1rem 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.confidence-high {
+  background: #14532d;
+  color: #4ade80;
+  border: 1px solid #166534;
+}
+
+.confidence-medium {
+  background: #451a03;
+  color: #fbbf24;
+  border: 1px solid #92400e;
+}
+
+.confidence-low {
+  background: #450a0a;
+  color: #f87171;
+  border: 1px solid #991b1b;
+}

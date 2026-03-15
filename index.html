@@ -21,8 +21,18 @@
           <input type="text" id="title" placeholder="e.g. Refactor function" required />
         </div>
         <div class="field">
+          <label for="model">Model Name</label>
+          <input type="text" id="model" placeholder="e.g. claude-sonnet-4-6" maxlength="100" required />
+        </div>
+        <div class="field">
           <label for="content">Prompt Content</label>
           <textarea id="content" rows="5" placeholder="Enter your prompt here..." required></textarea>
+        </div>
+        <div class="field field--inline">
+          <label class="field--inline-label">
+            <input type="checkbox" id="is-code" />
+            Content is code
+          </label>
         </div>
         <button type="submit">Save Prompt</button>
       </form>
