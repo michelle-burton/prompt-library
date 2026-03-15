@@ -404,3 +404,161 @@ button[type="submit"]:hover {
   color: #f87171;
   border: 1px solid #991b1b;
 }
+
+/* Library header with export/import toolbar */
+
+.library-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.library-header h2 {
+  margin-bottom: 0;
+}
+
+.library-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Ghost button (used for export, import label, modal cancel) */
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 0.35rem 0.9rem;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.btn-ghost:hover {
+  background: var(--surface-hover);
+  border-color: #58a6ff44;
+  color: var(--text);
+}
+
+/* Accent button (used for modal confirm) */
+
+.btn-accent {
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.5rem 1.2rem;
+  transition: background 0.15s;
+}
+
+.btn-accent:hover {
+  background: var(--accent-hover);
+}
+
+/* Import error banner */
+
+.import-error {
+  font-size: 0.82rem;
+  color: #f87171;
+  background: #450a0a;
+  border: 1px solid #991b1b;
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Modal overlay */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  max-width: 460px;
+  width: calc(100% - 2rem);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modal-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.modal-info {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Import mode options */
+
+.import-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.import-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.import-option:has(input:checked) {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.import-option input[type="radio"] {
+  margin-top: 2px;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+  width: auto;
+  cursor: pointer;
+}
+
+.import-option strong {
+  display: block;
+  margin-bottom: 0.2rem;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}

@@ -339,6 +339,248 @@ function deletePrompt(id) {
 }
 
 // ---------------------------------------------------------------------------
+// Export / Import
+// ---------------------------------------------------------------------------
+
+const EXPORT_VERSION = 1;
+
+/** Compute summary statistics for a prompts array. */
+function computeStats(prompts) {
+  const rated = prompts.filter((p) => p.rating != null);
+  const averageRating =
+    rated.length > 0
+      ? Math.round((rated.reduce((sum, p) => sum + p.rating, 0) / rated.length) * 10) / 10
+      : null;
+
+  const modelCounts = {};
+  prompts.forEach((p) => {
+    const model = p.metadata?.model;
+    if (model) modelCounts[model] = (modelCounts[model] || 0) + 1;
+  });
+  const mostUsedModel =
+    Object.keys(modelCounts).length > 0
+      ? Object.entries(modelCounts).sort((a, b) => b[1] - a[1])[0][0]
+      : null;
+
+  return { totalPrompts: prompts.length, averageRating, mostUsedModel };
+}
+
+/** Download the full library as a timestamped JSON file. */
+function exportLibrary() {
+  const prompts = getPrompts();
+  const exportData = {
+    version: EXPORT_VERSION,
+    exportedAt: new Date().toISOString(),
+    stats: computeStats(prompts),
+    prompts,
+  };
+
+  const json = JSON.stringify(exportData, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const date = new Date().toISOString().slice(0, 10);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `prompt-library-export-${date}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Validate the parsed JSON from an import file.
+ * Throws a descriptive Error on any structural problem.
+ */
+function validateImportData(data) {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    throw new Error('Invalid file: expected a JSON object.');
+  }
+  if (data.version !== EXPORT_VERSION) {
+    throw new Error(
+      `Unsupported export version "${data.version}". This app supports version ${EXPORT_VERSION}.`
+    );
+  }
+  if (!Array.isArray(data.prompts)) {
+    throw new Error('Invalid file: missing "prompts" array.');
+  }
+  data.prompts.forEach((p, i) => {
+    if (!p.id || typeof p.id !== 'string') {
+      throw new Error(`Prompt at index ${i} is missing a valid "id" field.`);
+    }
+    if (!p.title || typeof p.title !== 'string') {
+      throw new Error(`Prompt at index ${i} is missing a valid "title" field.`);
+    }
+    if (typeof p.content !== 'string') {
+      throw new Error(`Prompt at index ${i} is missing a valid "content" field.`);
+    }
+  });
+}
+
+// Holds validated import data between file-read and user confirmation.
+let pendingImportData = null;
+
+/** Show an inline error message below the library header. */
+function showImportError(message) {
+  const el = document.getElementById('import-error');
+  el.textContent = message;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 6000);
+}
+
+/** Open the merge-conflict modal after a file has been validated. */
+function showImportModal(totalCount, duplicateCount) {
+  const info = document.getElementById('import-modal-info');
+  const noDuplicateOptions = document.getElementById('import-options');
+
+  if (duplicateCount === 0) {
+    info.textContent = `Ready to import ${totalCount} prompt${totalCount !== 1 ? 's' : ''}. No conflicts with existing prompts.`;
+    // Hide merge options — plain merge-skip is fine; surface "replace" only
+    noDuplicateOptions.querySelector('[value="merge-overwrite"]').closest('label').style.display = 'none';
+  } else {
+    info.textContent =
+      `Found ${totalCount} prompt${totalCount !== 1 ? 's' : ''} — ` +
+      `${duplicateCount} already exist${duplicateCount === 1 ? 's' : ''} in your library.`;
+    noDuplicateOptions.querySelector('[value="merge-overwrite"]').closest('label').style.display = '';
+  }
+
+  // Reset radio to default
+  document.querySelector('input[name="import-mode"][value="merge-skip"]').checked = true;
+
+  document.getElementById('import-modal').style.display = 'flex';
+}
+
+function hideImportModal() {
+  document.getElementById('import-modal').style.display = 'none';
+}
+
+/**
+ * Read and validate a JSON file chosen by the user.
+ * On success, opens the confirmation modal.
+ */
+function handleImportFile(file) {
+  if (!file) return;
+  if (!file.name.endsWith('.json')) {
+    showImportError('Please select a .json file exported from this app.');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      let data = JSON.parse(e.target.result);
+
+      // Accept a raw prompts array (e.g. a direct localStorage backup) by
+      // wrapping it in the versioned envelope so the rest of the pipeline
+      // works identically for both formats.
+      if (Array.isArray(data)) {
+        data = {
+          version: EXPORT_VERSION,
+          exportedAt: new Date().toISOString(),
+          stats: computeStats(data),
+          prompts: data,
+        };
+      }
+
+      validateImportData(data);
+      pendingImportData = data;
+
+      const existingIds = new Set(getPrompts().map((p) => p.id));
+      const duplicateCount = data.prompts.filter((p) => existingIds.has(p.id)).length;
+      showImportModal(data.prompts.length, duplicateCount);
+    } catch (err) {
+      showImportError('Import failed: ' + err.message);
+    }
+  };
+  reader.onerror = () => showImportError('Could not read the file. Please try again.');
+  reader.readAsText(file);
+}
+
+/**
+ * Perform the actual import using the selected merge strategy.
+ * Backs up existing data and rolls back if anything goes wrong.
+ * @param {'replace'|'merge-skip'|'merge-overwrite'} mode
+ */
+function performImport(mode) {
+  if (!pendingImportData) return;
+
+  // Snapshot existing data for rollback
+  const backup = localStorage.getItem(STORAGE_KEY);
+
+  try {
+    const incoming = pendingImportData.prompts;
+
+    if (mode === 'replace') {
+      savePrompts(incoming);
+    } else {
+      const existing = getPrompts();
+      const existingMap = new Map(existing.map((p) => [p.id, p]));
+
+      if (mode === 'merge-skip') {
+        const newOnly = incoming.filter((p) => !existingMap.has(p.id));
+        savePrompts([...existing, ...newOnly]);
+      } else {
+        // merge-overwrite: update duplicates, append brand-new ones
+        incoming.forEach((p) => existingMap.set(p.id, p));
+        savePrompts(Array.from(existingMap.values()));
+      }
+    }
+
+    pendingImportData = null;
+    hideImportModal();
+    renderPrompts();
+  } catch (err) {
+    // Rollback to pre-import state
+    if (backup !== null) {
+      localStorage.setItem(STORAGE_KEY, backup);
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+    pendingImportData = null;
+    hideImportModal();
+    showImportError('Import failed and was rolled back: ' + err.message);
+  }
+}
+
+// Wire up export button
+document.getElementById('export-btn').addEventListener('click', exportLibrary);
+
+// Wire up the hidden file input (triggered by the <label>)
+document.getElementById('import-file-input').addEventListener('change', (e) => {
+  handleImportFile(e.target.files[0]);
+  // Reset so the same file can be re-selected if needed
+  e.target.value = '';
+});
+
+// Modal confirm
+document.getElementById('import-confirm-btn').addEventListener('click', () => {
+  const mode = document.querySelector('input[name="import-mode"]:checked').value;
+  performImport(mode);
+});
+
+// Modal cancel
+document.getElementById('import-cancel-btn').addEventListener('click', () => {
+  pendingImportData = null;
+  hideImportModal();
+});
+
+// Close modal on backdrop click
+document.getElementById('import-modal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) {
+    pendingImportData = null;
+    hideImportModal();
+  }
+});
+
+// Close modal on Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && document.getElementById('import-modal').style.display !== 'none') {
+    pendingImportData = null;
+    hideImportModal();
+  }
+});
+
+// ---------------------------------------------------------------------------
 // Form submit
 // ---------------------------------------------------------------------------
 
